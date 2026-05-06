@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股東會座位圖</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; background: #f0ede6; min-height: 100vh; display: flex; flex-direction: column; }
+
+#toolbar {
+  display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+  background: #fff; border-bottom: 1px solid #ddd;
+  flex-wrap: wrap; position: sticky; top: 0; z-index: 500;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+#title-area { display: flex; align-items: center; gap: 6px; margin-right: 10px; }
+#meeting-title {
+  font-size: 15px; font-weight: 700; color: #1a1a1a;
+  border: none; outline: none; background: transparent;
+  cursor: text; min-width: 60px; max-width: 280px;
+  border-bottom: 1.5px dashed #bbb; padding: 1px 4px;
+}
+#meeting-title:focus { border-bottom-color: #378ADD; background: #f0f7ff; border-radius: 3px; }
+#title-hint { font-size: 10px; color: #aaa; white-space: nowrap; }
+
+.sep { width: 1px; height: 22px; background: #e0e0e0; margin: 0 4px; }
+
+.tb-btn {
+  font-size: 12px; padding: 5px 11px; border-radius: 6px;
+  border: 1px solid #ccc; background: #fff; color: #333;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.tb-btn:hover { background: #e8f0fb; border-color: #378ADD; color: #185FA5; }
+.tb-btn.green { border-color: #28a745; color: #155724; background: #f0faf3; }
+.tb-btn.green:hover { background: #d4edda; }
+.tb-btn.orange { border-color: #e67e22; color: #7d4e00; background: #fff8f0; }
+.tb-btn.orange:hover { background: #fdebd0; }
+
+#canvas-wrap {
+  flex: 1; position: relative; overflow: auto;
+  background-color: #f0ede6;
+  background-image: radial-gradient(circle, #c8c5bc 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+#canvas { position: relative; width: 780px; height: 600px; margin: 18px auto; }
+
+/* ── Elements ── */
+.el {
+  position: absolute; cursor: grab; user-select: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; font-size: 11px; line-height: 1.4;
+  border-radius: 6px; padding: 4px 6px;
+  transition: box-shadow 0.12s;
+}
+.el:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
+.el:active { cursor: grabbing; }
+.el.sel { outline: 2.5px solid #378ADD; box-shadow: 0 0 0 4px rgba(55,138,221,0.18); z-index: 100 !important; }
+.el .lbl { font-weight: 500; width: 100%; word-break: break-all; white-space: pre-wrap; pointer-events: none; }
+.el .lbl[contenteditable="true"] { pointer-events: auto; outline: none; background: rgba(255,255,255,0.7); border-radius: 3px; min-height: 1em; }
+
+.el[data-t="table"]  { background: #daeaf8; border: 1.5px solid #378ADD; color: #0c3f6e; }
+.el[data-t="podium"] { background: #d4edda; border: 1.5px solid #28a745; color: #155724; }
+.el[data-t="area"]   { background: rgba(255,243,205,0.85); border: 1.5px dashed #d4a017; color: #5a3e00; }
+.el[data-t="person"] { background: #fce4ec; border: 1.5px solid #e91e8c; color: #560027; border-radius: 50%; }
+.el[data-t="sign"]   { background: #ede7f6; border: 1.5px solid #7e57c2; color: #311b92; }
+.el[data-t="door"]   { background: #f5f5f5; border: 2px solid #757575; color: #212121; }
+.el[data-t="screen"] { background: #263238; border: 2px solid #455a64; color: #eceff1; border-radius: 4px; }
+.el[data-t="box"]    { background: #fce8e3; border: 1.5px solid #d84315; color: #3e0600; }
+
+/* ── Edit Panel ── */
+#ep {
+  position: fixed; right: 14px; top: 58px; width: 215px;
+  background: #fff; border: 1px solid #ddd; border-radius: 10px;
+  padding: 14px; display: none; z-index: 600;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+}
+#ep-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+#ep-head h3 { font-size: 13px; font-weight: 600; color: #222; }
+#ep-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa; line-height: 1; padding: 0; }
+#ep-close:hover { color: #333; }
+#ep label { font-size: 11px; color: #666; display: block; margin-top: 8px; margin-bottom: 3px; }
+#ep textarea {
+  width: 100%; font-size: 12px; padding: 6px; border: 1px solid #ddd;
+  border-radius: 5px; resize: vertical; min-height: 52px;
+  font-family: inherit; background: #fafafa; color: #222;
+}
+#ep textarea:focus { outline: none; border-color: #378ADD; }
+#ep select, #ep input[type=range] { width: 100%; }
+#ep select { font-size: 12px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+.ep-val { font-weight: 700; color: #185FA5; }
+.ep-row { margin-top: 7px; }
+.btn-del {
+  width: 100%; margin-top: 12px; font-size: 12px; padding: 6px;
+  border-radius: 6px; border: 1px solid #f5c6c6;
+  background: #fff5f5; color: #c0392b; cursor: pointer;
+}
+.btn-del:hover { background: #fde8e8; }
+
+/* ── Legend ── */
+#legend {
+  display: flex; gap: 10px; padding: 7px 14px; flex-wrap: wrap;
+  background: #fff; border-top: 1px solid #ddd; font-size: 11px; align-items: center;
+}
+#legend > span { color: #666; font-weight: 500; }
+.leg { display: flex; align-items: center; gap: 4px; color: #444; }
+.leg-dot { width: 13px; height: 13px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+.leg-dot.t-table  { background: #daeaf8; border: 1px solid #378ADD; }
+.leg-dot.t-podium { background: #d4edda; border: 1px solid #28a745; }
+.leg-dot.t-person { background: #fce4ec; border: 1px solid #e91e8c; border-radius: 50%; }
+.leg-dot.t-sign   { background: #ede7f6; border: 1px solid #7e57c2; }
+.leg-dot.t-area   { background: #fff3cd; border: 1px dashed #d4a017; }
+.leg-dot.t-box    { background: #fce8e3; border: 1px solid #d84315; }
+.leg-dot.t-door   { background: #f5f5f5; border: 1px solid #757575; }
+.leg-dot.t-screen { background: #263238; border: 1px solid #455a64; border-radius: 2px; }
+
+#hint { font-size: 11px; color: #999; text-align: center; padding: 5px 10px; background: #fff; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div id="title-area">
+    <input id="meeting-title" type="text" value="5/27(二) 股東會座位圖" title="點擊修改標題與日期" />
+    <span id="title-hint">← 點擊可修改</span>
+  </div>
+  <div class="sep"></div>
+  <button class="tb-btn" onclick="addEl('table','新桌子',110,58)">＋ 桌子</button>
+  <button class="tb-btn" onclick="addEl('person','新人員',52,52)">＋ 人員</button>
+  <button class="tb-btn" onclick="addEl('sign','新看板',88,60)">＋ 看板</button>
+  <button class="tb-btn" onclick="addEl('area','新區域',120,42)">＋ 區域</button>
+  <button class="tb-btn" onclick="addEl('door','門口桌',130,65)">＋ 門口</button>
+  <div class="sep"></div>
+  <button class="tb-btn orange" onclick="resetLayout()">↺ 重置版面</button>
+  <button class="tb-btn green" onclick="exportHTML()">💾 另存 HTML</button>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas"></div>
+</div>
+
+<div id="legend">
+  <span>圖例：</span>
+  <div class="leg"><div class="leg-dot t-table"></div>桌子</div>
+  <div class="leg"><div class="leg-dot t-podium"></div>主席台</div>
+  <div class="leg"><div class="leg-dot t-person"></div>人員</div>
+  <div class="leg"><div class="leg-dot t-sign"></div>看板/海報架</div>
+  <div class="leg"><div class="leg-dot t-area"></div>人員區域</div>
+  <div class="leg"><div class="leg-dot t-box"></div>特殊桌</div>
+  <div class="leg"><div class="leg-dot t-door"></div>門口</div>
+  <div class="leg"><div class="leg-dot t-screen"></div>台/橫幅</div>
+</div>
+
+<div id="hint">拖曳移動 &nbsp;·&nbsp; 點選開啟右側編輯面板 &nbsp;·&nbsp; 雙擊直接改名 &nbsp;·&nbsp; 💾 另存 HTML 可保存當前版面</div>
+
+<!-- Edit Panel -->
+<div id="ep">
+  <div id="ep-head">
+    <h3>✏️ 編輯元素</h3>
+    <button id="ep-close" onclick="closeEp()" title="關閉">×</button>
+  </div>
+  <label>名稱 / 說明</label>
+  <textarea id="ep-lbl" rows="3" oninput="updateSelLabel()"></textarea>
+  <div class="ep-row">
+    <label>類型</label>
+    <select id="ep-type" onchange="updateSelType()">
+      <option value="table">桌子</option>
+      <option value="podium">主席台</option>
+      <option value="person">人員（圓形）</option>
+      <option value="sign">看板 / 海報架</option>
+      <option value="area">人員區域（虛線）</option>
+      <option value="box">特殊桌</option>
+      <option value="door">門口</option>
+      <option value="screen">台 / 橫幅</option>
+    </select>
+  </div>
+  <div class="ep-row">
+    <label>寬度：<span class="ep-val" id="ep-wo">110</span> px</label>
+    <input type="range" id="ep-w" min="40" max="320" value="110" oninput="updSz()">
+  </div>
+  <div class="ep-row">
+    <label>高度：<span class="ep-val" id="ep-ho">58</span> px</label>
+    <input type="range" id="ep-h" min="40" max="200" value="58" oninput="updSz()">
+  </div>
+  <button class="btn-del" onclick="delSel()">🗑 刪除此元素</button>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ep = document.getElementById('ep');
+let sel = null, eid = 300;
+
+/* ── 原始版面（依 PDF 還原）── */
+const INIT = [
+  { id:'s1', t:'screen', lbl:'台',                                               x:10,  y:8,   w:510, h:30 },
+  { id:'t1', t:'table',  lbl:'會計師\n黃心賢　張寶釵\n陳春美',                   x:10,  y:48,  w:155, h:74 },
+  { id:'t2', t:'table',  lbl:'會計師\n吳雪如\n邱仁海　施義紳\n陳秋燕　士芬',     x:170, y:48,  w:155, h:74 },
+  { id:'t3', t:'podium', lbl:'主席\n陳樹',                                        x:333, y:48,  w:80,  h:74 },
+  { id:'t4', t:'table',  lbl:'律師',                                              x:420, y:48,  w:60,  h:74 },
+  { id:'t5', t:'table',  lbl:'財務長',                                            x:487, y:48,  w:68,  h:74 },
+  { id:'t6', t:'table',  lbl:'會計師\n許小姐',                                    x:562, y:48,  w:88,  h:74 },
+  { id:'p1', t:'person', lbl:'司\n儀',                                            x:662, y:56,  w:52,  h:52 },
+
+  { id:'sg1',t:'sign',   lbl:'台\n（會議議程\n海報架）',                          x:10,  y:138, w:90,  h:72 },
+  { id:'sg2',t:'sign',   lbl:'出席股數\n海報架',                                  x:106, y:138, w:90,  h:72 },
+
+  { id:'p2', t:'person', lbl:'元大\n李董',                                        x:10,  y:232, w:58,  h:58 },
+  { id:'p3', t:'person', lbl:'美\n芳',                                            x:74,  y:236, w:50,  h:50 },
+  { id:'t7', t:'table',  lbl:'記錄桌\n昱伶、又瑄',                               x:134, y:232, w:135, h:58 },
+
+  { id:'t8', t:'table',  lbl:'視訊設備桌\n（2人）',                              x:430, y:232, w:145, h:58 },
+  { id:'p4', t:'person', lbl:'視訊小編\n韶宇、惠詒',                             x:582, y:226, w:86,  h:64 },
+  { id:'p5', t:'person', lbl:'照相手\n乃心',                                     x:675, y:232, w:56,  h:56 },
+
+  { id:'t9', t:'table',  lbl:'股務視訊桌',                                       x:430, y:315, w:125, h:52 },
+  { id:'t10',t:'box',    lbl:'股務桌\n＋投票箱',                                  x:562, y:315, w:115, h:52 },
+
+  { id:'a1', t:'area',   lbl:'元大 1人',                                          x:430, y:374, w:115, h:36 },
+  { id:'a2', t:'area',   lbl:'元大 1人',                                          x:555, y:374, w:115, h:36 },
+  { id:'a3', t:'area',   lbl:'淑儀、元大 1人',                                    x:134, y:315, w:150, h:52 },
+
+  { id:'d1', t:'door',   lbl:'門口\n股東報到桌\n（室外）',                        x:300, y:470, w:155, h:68 },
+];
+
+/* ── 建立元素 ── */
+function makeEl(cfg) {
+  const el = document.createElement('div');
+  el.className = 'el';
+  el.dataset.t = cfg.t;
+  el.dataset.id = cfg.id;
+  el.style.cssText = `left:${cfg.x}px;top:${cfg.y}px;width:${cfg.w}px;height:${cfg.h}px;z-index:10;`;
+  const lbl = document.createElement('div');
+  lbl.className = 'lbl';
+  lbl.textContent = cfg.lbl;
+  el.appendChild(lbl);
+  el.addEventListener('mousedown', onDragStart);
+  el.addEventListener('touchstart', onTouchStart, { passive: false });
+  el.addEventListener('click', e => { e.stopPropagation(); selectEl(el); });
+  el.addEventListener('dblclick', e => { e.stopPropagation(); inlineEdit(el); });
+  canvas.appendChild(el);
+  return el;
+}
+
+function resetLayout() {
+  canvas.innerHTML = '';
+  sel = null; ep.style.display = 'none';
+  INIT.forEach(cfg => makeEl({ ...cfg }));
+}
+resetLayout();
+
+function addEl(t, lbl, w, h) {
+  eid++;
+  const wrap = document.getElementById('canvas-wrap');
+  const cx = Math.round(wrap.scrollLeft + wrap.clientWidth / 2 - w / 2);
+  const cy = Math.round(wrap.scrollTop + wrap.clientHeight / 2 - h / 2);
+  const el = makeEl({ id: 'n' + eid, t, lbl, x: Math.max(0, cx), y: Math.max(0, cy), w, h });
+  selectEl(el);
+}
+
+/* ── 選取 ── */
+function selectEl(el) {
+  if (sel) sel.classList.remove('sel');
+  sel = el; el.classList.add('sel');
+  ep.style.display = 'block';
+  document.getElementById('ep-lbl').value = el.querySelector('.lbl').textContent;
+  document.getElementById('ep-type').value = el.dataset.t;
+  const w = parseInt(el.style.width), h = parseInt(el.style.height);
+  document.getElementById('ep-w').value = w; document.getElementById('ep-wo').textContent = w;
+  document.getElementById('ep-h').value = h; document.getElementById('ep-ho').textContent = h;
+}
+
+function closeEp() {
+  if (sel) sel.classList.remove('sel');
+  sel = null; ep.style.display = 'none';
+}
+
+document.getElementById('canvas-wrap').addEventListener('click', closeEp);
+ep.addEventListener('click', e => e.stopPropagation());
+
+/* ── 編輯 ── */
+function updateSelLabel() {
+  if (!sel) return;
+  sel.querySelector('.lbl').textContent = document.getElementById('ep-lbl').value;
+}
+function updateSelType() {
+  if (!sel) return;
+  const t = document.getElementById('ep-type').value;
+  sel.dataset.t = t;
+  // person 補圓形
+  sel.style.borderRadius = (t === 'person') ? '50%' : '6px';
+}
+function updSz() {
+  if (!sel) return;
+  const w = document.getElementById('ep-w').value;
+  const h = document.getElementById('ep-h').value;
+  document.getElementById('ep-wo').textContent = w;
+  document.getElementById('ep-ho').textContent = h;
+  sel.style.width = w + 'px'; sel.style.height = h + 'px';
+}
+function delSel() {
+  if (!sel) return;
+  canvas.removeChild(sel); sel = null; ep.style.display = 'none';
+}
+
+/* ── 雙擊改名 ── */
+function inlineEdit(el) {
+  const lbl = el.querySelector('.lbl');
+  const old = lbl.textContent;
+  lbl.contentEditable = 'true'; lbl.focus();
+  const r = document.createRange();
+  r.selectNodeContents(lbl);
+  const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  lbl.onblur = () => {
+    lbl.contentEditable = 'false';
+    if (ep.style.display === 'block') document.getElementById('ep-lbl').value = lbl.textContent;
+  };
+  lbl.onkeydown = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); lbl.blur(); }
+    if (e.key === 'Escape') { lbl.textContent = old; lbl.blur(); }
+  };
+}
+
+/* ── 拖曳（滑鼠）── */
+function onDragStart(e) {
+  if (e.target.contentEditable === 'true') return;
+  e.preventDefault();
+  const el = e.currentTarget;
+  const wrap = document.getElementById('canvas-wrap');
+  const wr = wrap.getBoundingClientRect();
+  const ox = e.clientX - wr.left + wrap.scrollLeft - parseInt(el.style.left);
+  const oy = e.clientY - wr.top  + wrap.scrollTop  - parseInt(el.style.top);
+  el.style.zIndex = 200; selectEl(el);
+  function mv(ev) {
+    el.style.left = Math.max(0, ev.clientX - wr.left + wrap.scrollLeft - ox) + 'px';
+    el.style.top  = Math.max(0, ev.clientY - wr.top  + wrap.scrollTop  - oy) + 'px';
+  }
+  function up() { el.style.zIndex = 10; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); }
+  window.addEventListener('mousemove', mv);
+  window.addEventListener('mouseup', up);
+}
+
+/* ── 拖曳（觸控）── */
+function onTouchStart(e) {
+  if (e.target.contentEditable === 'true') return;
+  e.preventDefault();
+  const el = e.currentTarget;
+  const wrap = document.getElementById('canvas-wrap');
+  const wr = wrap.getBoundingClientRect();
+  const t0 = e.touches[0];
+  const ox = t0.clientX - wr.left + wrap.scrollLeft - parseInt(el.style.left);
+  const oy = t0.clientY - wr.top  + wrap.scrollTop  - parseInt(el.style.top);
+  el.style.zIndex = 200; selectEl(el);
+  function mv(ev) {
+    const t = ev.touches[0];
+    el.style.left = Math.max(0, t.clientX - wr.left + wrap.scrollLeft - ox) + 'px';
+    el.style.top  = Math.max(0, t.clientY - wr.top  + wrap.scrollTop  - oy) + 'px';
+  }
+  function up() { el.style.zIndex = 10; el.removeEventListener('touchmove', mv); el.removeEventListener('touchend', up); }
+  el.addEventListener('touchmove', mv, { passive: false });
+  el.addEventListener('touchend', up);
+}
+
+/* ── 另存 HTML（含當前版面狀態）── */
+function exportHTML() {
+  const title = document.getElementById('meeting-title').value.trim() || '股東會座位圖';
+  const els = Array.from(canvas.querySelectorAll('.el')).map(el => ({
+    id: el.dataset.id, t: el.dataset.t,
+    lbl: el.querySelector('.lbl').textContent,
+    x: parseInt(el.style.left), y: parseInt(el.style.top),
+    w: parseInt(el.style.width), h: parseInt(el.style.height),
+  }));
+  // 把當前版面狀態注入成新的 INIT
+  const snapshot = JSON.stringify(els, null, 2);
+  let src = document.documentElement.outerHTML;
+  // 替換 INIT 陣列內容
+  src = src.replace(/const INIT = \[[\s\S]*?\];/, `const INIT = ${snapshot};`);
+  // 替換 title input 的 value
+  src = src.replace(/value="[^"]*" title="點擊修改標題與日期"/, `value="${title.replace(/"/g,'&quot;')}" title="點擊修改標題與日期"`);
+  // 替換 <title>
+  src = src.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+  const blob = new Blob([src], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>
