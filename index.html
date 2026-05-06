@@ -9,13 +9,12 @@
 body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; background: #f0ede6; min-height: 100vh; display: flex; flex-direction: column; }
 
 #toolbar {
-  display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+  display: flex; align-items: center; gap: 7px; padding: 8px 14px;
   background: #fff; border-bottom: 1px solid #ddd;
   flex-wrap: wrap; position: sticky; top: 0; z-index: 500;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-
-#title-area { display: flex; align-items: center; gap: 6px; margin-right: 10px; }
+#title-area { display: flex; align-items: center; gap: 6px; margin-right: 8px; }
 #meeting-title {
   font-size: 15px; font-weight: 700; color: #1a1a1a;
   border: none; outline: none; background: transparent;
@@ -24,99 +23,111 @@ body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; bac
 }
 #meeting-title:focus { border-bottom-color: #378ADD; background: #f0f7ff; border-radius: 3px; }
 #title-hint { font-size: 10px; color: #aaa; white-space: nowrap; }
-
-.sep { width: 1px; height: 22px; background: #e0e0e0; margin: 0 4px; }
+.sep { width: 1px; height: 22px; background: #e0e0e0; margin: 0 2px; flex-shrink: 0; }
 
 .tb-btn {
-  font-size: 12px; padding: 5px 11px; border-radius: 6px;
+  font-size: 12px; padding: 5px 10px; border-radius: 6px;
   border: 1px solid #ccc; background: #fff; color: #333;
   cursor: pointer; white-space: nowrap;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 .tb-btn:hover { background: #e8f0fb; border-color: #378ADD; color: #185FA5; }
-.tb-btn.green { border-color: #28a745; color: #155724; background: #f0faf3; }
-.tb-btn.green:hover { background: #d4edda; }
-.tb-btn.orange { border-color: #e67e22; color: #7d4e00; background: #fff8f0; }
-.tb-btn.orange:hover { background: #fdebd0; }
+.tb-btn.green  { border-color:#28a745; color:#155724; background:#f0faf3; }
+.tb-btn.green:hover  { background:#d4edda; }
+.tb-btn.orange { border-color:#e67e22; color:#7d4e00; background:#fff8f0; }
+.tb-btn.orange:hover { background:#fdebd0; }
+.tb-btn.purple { border-color:#7e57c2; color:#311b92; background:#f3f0fb; }
+.tb-btn.purple:hover { background:#ede7f6; }
+.tb-btn:disabled { opacity:0.35; cursor:not-allowed; background:#fff !important; }
 
 #canvas-wrap {
   flex: 1; position: relative; overflow: auto;
   background-color: #f0ede6;
   background-image: radial-gradient(circle, #c8c5bc 1px, transparent 1px);
   background-size: 20px 20px;
+  min-height: calc(100vh - 95px);
 }
-#canvas { position: relative; width: 780px; height: 600px; margin: 18px auto; }
+#canvas { position: relative; width: 960px; height: 720px; margin: 18px auto; }
 
-/* ── Elements ── */
 .el {
   position: absolute; cursor: grab; user-select: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; font-size: 11px; line-height: 1.4;
-  border-radius: 6px; padding: 4px 6px;
+  text-align: center; font-size: 12px; line-height: 1.45;
+  border-radius: 6px; padding: 5px 7px;
   transition: box-shadow 0.12s;
 }
 .el:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
 .el:active { cursor: grabbing; }
-.el.sel { outline: 2.5px solid #378ADD; box-shadow: 0 0 0 4px rgba(55,138,221,0.18); z-index: 100 !important; }
+.el.sel { outline: 2.5px solid #378ADD; box-shadow: 0 0 0 4px rgba(55,138,221,0.2); z-index: 100 !important; }
 .el .lbl { font-weight: 500; width: 100%; word-break: break-all; white-space: pre-wrap; pointer-events: none; }
-.el .lbl[contenteditable="true"] { pointer-events: auto; outline: none; background: rgba(255,255,255,0.7); border-radius: 3px; min-height: 1em; }
+.el .lbl[contenteditable="true"] { pointer-events: auto; outline: none; background: rgba(255,255,255,0.75); border-radius: 3px; }
 
-.el[data-t="table"]  { background: #daeaf8; border: 1.5px solid #378ADD; color: #0c3f6e; }
-.el[data-t="podium"] { background: #d4edda; border: 1.5px solid #28a745; color: #155724; }
-.el[data-t="area"]   { background: rgba(255,243,205,0.85); border: 1.5px dashed #d4a017; color: #5a3e00; }
-.el[data-t="person"] { background: #fce4ec; border: 1.5px solid #e91e8c; color: #560027; border-radius: 50%; }
-.el[data-t="sign"]   { background: #ede7f6; border: 1.5px solid #7e57c2; color: #311b92; }
-.el[data-t="door"]   { background: #f5f5f5; border: 2px solid #757575; color: #212121; }
-.el[data-t="screen"] { background: #263238; border: 2px solid #455a64; color: #eceff1; border-radius: 4px; }
-.el[data-t="box"]    { background: #fce8e3; border: 1.5px solid #d84315; color: #3e0600; }
+/* default type styles (overridden by inline style when custom color set) */
+.el[data-t="table"]    { background:#daeaf8; border:1.5px solid #378ADD; color:#0c3f6e; }
+.el[data-t="podium"]   { background:#d4edda; border:1.5px solid #28a745; color:#155724; }
+.el[data-t="area"]     { background:rgba(255,243,205,0.85); border:1.5px dashed #d4a017; color:#5a3e00; }
+.el[data-t="person"]   { background:#fce4ec; border:1.5px solid #e91e8c; color:#560027; border-radius:50%; }
+.el[data-t="sign"]     { background:#ede7f6; border:1.5px solid #7e57c2; color:#311b92; }
+.el[data-t="door"]     { background:#f5f5f5; border:2px solid #757575; color:#212121; }
+.el[data-t="screen"]   { background:#263238; border:2px solid #455a64; color:#eceff1; border-radius:4px; }
+.el[data-t="projector"]{ background:#e0e0e0; border:2px solid #9e9e9e; color:#333; border-radius:4px; font-style:italic; }
+.el[data-t="box"]      { background:#fce8e3; border:1.5px solid #d84315; color:#3e0600; }
 
-/* ── Edit Panel ── */
+/* Edit Panel */
 #ep {
-  position: fixed; right: 14px; top: 58px; width: 215px;
+  position: fixed; right: 14px; top: 58px; width: 230px;
   background: #fff; border: 1px solid #ddd; border-radius: 10px;
   padding: 14px; display: none; z-index: 600;
   box-shadow: 0 4px 18px rgba(0,0,0,0.13);
 }
-#ep-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-#ep-head h3 { font-size: 13px; font-weight: 600; color: #222; }
-#ep-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa; line-height: 1; padding: 0; }
-#ep-close:hover { color: #333; }
-#ep label { font-size: 11px; color: #666; display: block; margin-top: 8px; margin-bottom: 3px; }
+#ep-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px; }
+#ep-head h3 { font-size:13px; font-weight:600; color:#222; }
+#ep-close { background:none; border:none; font-size:18px; cursor:pointer; color:#aaa; line-height:1; padding:0; }
+#ep-close:hover { color:#333; }
+#ep label { font-size:11px; color:#666; display:block; margin-top:8px; margin-bottom:3px; }
 #ep textarea {
-  width: 100%; font-size: 12px; padding: 6px; border: 1px solid #ddd;
-  border-radius: 5px; resize: vertical; min-height: 52px;
-  font-family: inherit; background: #fafafa; color: #222;
+  width:100%; font-size:12px; padding:6px; border:1px solid #ddd;
+  border-radius:5px; resize:vertical; min-height:52px;
+  font-family:inherit; background:#fafafa; color:#222;
 }
-#ep textarea:focus { outline: none; border-color: #378ADD; }
-#ep select, #ep input[type=range] { width: 100%; }
-#ep select { font-size: 12px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
-.ep-val { font-weight: 700; color: #185FA5; }
-.ep-row { margin-top: 7px; }
-.btn-del {
-  width: 100%; margin-top: 12px; font-size: 12px; padding: 6px;
-  border-radius: 6px; border: 1px solid #f5c6c6;
-  background: #fff5f5; color: #c0392b; cursor: pointer;
-}
-.btn-del:hover { background: #fde8e8; }
+#ep textarea:focus { outline:none; border-color:#378ADD; }
+#ep select, #ep input[type=range] { width:100%; }
+#ep select { font-size:12px; padding:4px 6px; border:1px solid #ddd; border-radius:5px; background:#fafafa; }
+.ep-val { font-weight:700; color:#185FA5; }
+.ep-row { margin-top:7px; }
 
-/* ── Legend ── */
+/* color pickers row */
+.color-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.color-item { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; color:#666; }
+.color-item input[type=color] { width:36px; height:28px; border:1px solid #ddd; border-radius:4px; cursor:pointer; padding:1px; background:#fafafa; }
+.reset-color { font-size:10px; padding:3px 7px; border:1px solid #ddd; border-radius:4px; background:#f5f5f5; cursor:pointer; color:#555; margin-top:4px; width:100%; }
+.reset-color:hover { background:#e8e8e8; }
+
+.ep-actions { display:flex; gap:6px; margin-top:12px; }
+.btn-dup { flex:1; font-size:12px; padding:6px; border-radius:6px; border:1px solid #b0c4de; background:#eef4fb; color:#185FA5; cursor:pointer; }
+.btn-dup:hover { background:#d0e4f7; }
+.btn-del { flex:1; font-size:12px; padding:6px; border-radius:6px; border:1px solid #f5c6c6; background:#fff5f5; color:#c0392b; cursor:pointer; }
+.btn-del:hover { background:#fde8e8; }
+
+/* Legend */
 #legend {
-  display: flex; gap: 10px; padding: 7px 14px; flex-wrap: wrap;
-  background: #fff; border-top: 1px solid #ddd; font-size: 11px; align-items: center;
+  display:flex; gap:10px; padding:7px 14px; flex-wrap:wrap;
+  background:#fff; border-top:1px solid #ddd; font-size:11px; align-items:center;
 }
-#legend > span { color: #666; font-weight: 500; }
-.leg { display: flex; align-items: center; gap: 4px; color: #444; }
-.leg-dot { width: 13px; height: 13px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
-.leg-dot.t-table  { background: #daeaf8; border: 1px solid #378ADD; }
-.leg-dot.t-podium { background: #d4edda; border: 1px solid #28a745; }
-.leg-dot.t-person { background: #fce4ec; border: 1px solid #e91e8c; border-radius: 50%; }
-.leg-dot.t-sign   { background: #ede7f6; border: 1px solid #7e57c2; }
-.leg-dot.t-area   { background: #fff3cd; border: 1px dashed #d4a017; }
-.leg-dot.t-box    { background: #fce8e3; border: 1px solid #d84315; }
-.leg-dot.t-door   { background: #f5f5f5; border: 1px solid #757575; }
-.leg-dot.t-screen { background: #263238; border: 1px solid #455a64; border-radius: 2px; }
+#legend > span { color:#666; font-weight:500; }
+.leg { display:flex; align-items:center; gap:4px; color:#444; }
+.leg-dot { width:13px; height:13px; border-radius:3px; display:inline-block; flex-shrink:0; }
+.leg-dot.t-table     { background:#daeaf8; border:1px solid #378ADD; }
+.leg-dot.t-podium    { background:#d4edda; border:1px solid #28a745; }
+.leg-dot.t-person    { background:#fce4ec; border:1px solid #e91e8c; border-radius:50%; }
+.leg-dot.t-sign      { background:#ede7f6; border:1px solid #7e57c2; }
+.leg-dot.t-area      { background:#fff3cd; border:1px dashed #d4a017; }
+.leg-dot.t-box       { background:#fce8e3; border:1px solid #d84315; }
+.leg-dot.t-door      { background:#f5f5f5; border:1px solid #757575; }
+.leg-dot.t-screen    { background:#263238; border:1px solid #455a64; border-radius:2px; }
+.leg-dot.t-projector { background:#e0e0e0; border:1px solid #9e9e9e; border-radius:2px; }
 
-#hint { font-size: 11px; color: #999; text-align: center; padding: 5px 10px; background: #fff; border-top: 1px solid #eee; }
+#hint { font-size:11px; color:#999; text-align:center; padding:5px 10px; background:#fff; border-top:1px solid #eee; }
 </style>
 </head>
 <body>
@@ -127,11 +138,14 @@ body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; bac
     <span id="title-hint">← 點擊可修改</span>
   </div>
   <div class="sep"></div>
-  <button class="tb-btn" onclick="addEl('table','新桌子',110,58)">＋ 桌子</button>
-  <button class="tb-btn" onclick="addEl('person','新人員',52,52)">＋ 人員</button>
-  <button class="tb-btn" onclick="addEl('sign','新看板',88,60)">＋ 看板</button>
-  <button class="tb-btn" onclick="addEl('area','新區域',120,42)">＋ 區域</button>
-  <button class="tb-btn" onclick="addEl('door','門口桌',130,65)">＋ 門口</button>
+  <button class="tb-btn" onclick="addEl('table','新桌子',140,70)">＋ 桌子</button>
+  <button class="tb-btn" onclick="addEl('person','新人員',64,64)">＋ 人員</button>
+  <button class="tb-btn" onclick="addEl('sign','新看板',100,72)">＋ 看板</button>
+  <button class="tb-btn" onclick="addEl('area','新區域',145,48)">＋ 區域</button>
+  <button class="tb-btn" onclick="addEl('door','門口桌',165,78)">＋ 門口</button>
+  <button class="tb-btn" onclick="addEl('projector','投影幕',260,36)">＋ 投影幕</button>
+  <div class="sep"></div>
+  <button class="tb-btn purple" id="btn-dup" onclick="dupSel()" disabled>⧉ 複製選取</button>
   <div class="sep"></div>
   <button class="tb-btn orange" onclick="resetLayout()">↺ 重置版面</button>
   <button class="tb-btn green" onclick="exportHTML()">💾 另存 HTML</button>
@@ -151,18 +165,19 @@ body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; bac
   <div class="leg"><div class="leg-dot t-box"></div>特殊桌</div>
   <div class="leg"><div class="leg-dot t-door"></div>門口</div>
   <div class="leg"><div class="leg-dot t-screen"></div>台/橫幅</div>
+  <div class="leg"><div class="leg-dot t-projector"></div>投影幕</div>
 </div>
 
-<div id="hint">拖曳移動 &nbsp;·&nbsp; 點選開啟右側編輯面板 &nbsp;·&nbsp; 雙擊直接改名 &nbsp;·&nbsp; 💾 另存 HTML 可保存當前版面</div>
+<div id="hint">拖曳移動 · 點選編輯 · 雙擊改名 · 右側面板可改顏色 · ⧉ 複製 · 💾 另存 HTML</div>
 
-<!-- Edit Panel -->
 <div id="ep">
   <div id="ep-head">
     <h3>✏️ 編輯元素</h3>
-    <button id="ep-close" onclick="closeEp()" title="關閉">×</button>
+    <button id="ep-close" onclick="closeEp()">×</button>
   </div>
   <label>名稱 / 說明</label>
   <textarea id="ep-lbl" rows="3" oninput="updateSelLabel()"></textarea>
+
   <div class="ep-row">
     <label>類型</label>
     <select id="ep-type" onchange="updateSelType()">
@@ -174,63 +189,123 @@ body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif; bac
       <option value="box">特殊桌</option>
       <option value="door">門口</option>
       <option value="screen">台 / 橫幅</option>
+      <option value="projector">投影幕</option>
     </select>
   </div>
+
   <div class="ep-row">
-    <label>寬度：<span class="ep-val" id="ep-wo">110</span> px</label>
-    <input type="range" id="ep-w" min="40" max="320" value="110" oninput="updSz()">
+    <label>寬度：<span class="ep-val" id="ep-wo">140</span> px</label>
+    <input type="range" id="ep-w" min="44" max="600" value="140" oninput="updSz()">
   </div>
   <div class="ep-row">
-    <label>高度：<span class="ep-val" id="ep-ho">58</span> px</label>
-    <input type="range" id="ep-h" min="40" max="200" value="58" oninput="updSz()">
+    <label>高度：<span class="ep-val" id="ep-ho">70</span> px</label>
+    <input type="range" id="ep-h" min="30" max="240" value="70" oninput="updSz()">
   </div>
-  <button class="btn-del" onclick="delSel()">🗑 刪除此元素</button>
+
+  <label style="margin-top:10px;">自訂顏色</label>
+  <div class="color-row">
+    <div class="color-item">
+      <input type="color" id="cp-bg" value="#daeaf8" oninput="applyColor()">
+      <span>背景</span>
+    </div>
+    <div class="color-item">
+      <input type="color" id="cp-border" value="#378ADD" oninput="applyColor()">
+      <span>框線</span>
+    </div>
+    <div class="color-item">
+      <input type="color" id="cp-text" value="#0c3f6e" oninput="applyColor()">
+      <span>文字</span>
+    </div>
+  </div>
+  <button class="reset-color" onclick="resetColor()">↺ 還原預設顏色</button>
+
+  <div class="ep-actions">
+    <button class="btn-dup" onclick="dupSel()">⧉ 複製</button>
+    <button class="btn-del" onclick="delSel()">🗑 刪除</button>
+  </div>
 </div>
 
 <script>
 const canvas = document.getElementById('canvas');
 const ep = document.getElementById('ep');
+const btnDup = document.getElementById('btn-dup');
 let sel = null, eid = 300;
 
-/* ── 原始版面（依 PDF 還原）── */
+/* default colors per type */
+const TYPE_COLORS = {
+  table:     { bg:'#daeaf8', border:'#378ADD', text:'#0c3f6e' },
+  podium:    { bg:'#d4edda', border:'#28a745', text:'#155724' },
+  area:      { bg:'#fff3cd', border:'#d4a017', text:'#5a3e00' },
+  person:    { bg:'#fce4ec', border:'#e91e8c', text:'#560027' },
+  sign:      { bg:'#ede7f6', border:'#7e57c2', text:'#311b92' },
+  door:      { bg:'#f5f5f5', border:'#757575', text:'#212121' },
+  screen:    { bg:'#263238', border:'#455a64', text:'#eceff1' },
+  projector: { bg:'#e0e0e0', border:'#9e9e9e', text:'#333333' },
+  box:       { bg:'#fce8e3', border:'#d84315', text:'#3e0600' },
+};
+
 const INIT = [
-  { id:'s1', t:'screen', lbl:'台',                                               x:10,  y:8,   w:510, h:30 },
-  { id:'t1', t:'table',  lbl:'會計師\n黃心賢　張寶釵\n陳春美',                   x:10,  y:48,  w:155, h:74 },
-  { id:'t2', t:'table',  lbl:'會計師\n吳雪如\n邱仁海　施義紳\n陳秋燕　士芬',     x:170, y:48,  w:155, h:74 },
-  { id:'t3', t:'podium', lbl:'主席\n陳樹',                                        x:333, y:48,  w:80,  h:74 },
-  { id:'t4', t:'table',  lbl:'律師',                                              x:420, y:48,  w:60,  h:74 },
-  { id:'t5', t:'table',  lbl:'財務長',                                            x:487, y:48,  w:68,  h:74 },
-  { id:'t6', t:'table',  lbl:'會計師\n許小姐',                                    x:562, y:48,  w:88,  h:74 },
-  { id:'p1', t:'person', lbl:'司\n儀',                                            x:662, y:56,  w:52,  h:52 },
-
-  { id:'sg1',t:'sign',   lbl:'台\n（會議議程\n海報架）',                          x:10,  y:138, w:90,  h:72 },
-  { id:'sg2',t:'sign',   lbl:'出席股數\n海報架',                                  x:106, y:138, w:90,  h:72 },
-
-  { id:'p2', t:'person', lbl:'元大\n李董',                                        x:10,  y:232, w:58,  h:58 },
-  { id:'p3', t:'person', lbl:'美\n芳',                                            x:74,  y:236, w:50,  h:50 },
-  { id:'t7', t:'table',  lbl:'記錄桌\n昱伶、又瑄',                               x:134, y:232, w:135, h:58 },
-
-  { id:'t8', t:'table',  lbl:'視訊設備桌\n（2人）',                              x:430, y:232, w:145, h:58 },
-  { id:'p4', t:'person', lbl:'視訊小編\n韶宇、惠詒',                             x:582, y:226, w:86,  h:64 },
-  { id:'p5', t:'person', lbl:'照相手\n乃心',                                     x:675, y:232, w:56,  h:56 },
-
-  { id:'t9', t:'table',  lbl:'股務視訊桌',                                       x:430, y:315, w:125, h:52 },
-  { id:'t10',t:'box',    lbl:'股務桌\n＋投票箱',                                  x:562, y:315, w:115, h:52 },
-
-  { id:'a1', t:'area',   lbl:'元大 1人',                                          x:430, y:374, w:115, h:36 },
-  { id:'a2', t:'area',   lbl:'元大 1人',                                          x:555, y:374, w:115, h:36 },
-  { id:'a3', t:'area',   lbl:'淑儀、元大 1人',                                    x:134, y:315, w:150, h:52 },
-
-  { id:'d1', t:'door',   lbl:'門口\n股東報到桌\n（室外）',                        x:300, y:470, w:155, h:68 },
+  /* 投影幕 */
+  { id:'proj1', t:'projector', lbl:'投影幕',                                          x:10,  y:8,   w:570, h:34, cc:null },
+  /* 台橫幅 */
+  { id:'s1',    t:'screen',    lbl:'台',                                               x:10,  y:52,  w:570, h:30, cc:null },
+  /* 會計師左 */
+  { id:'t1',    t:'table',     lbl:'會計師\n黃心賢　張寶釵\n陳春美',                   x:10,  y:92,  w:178, h:84, cc:null },
+  { id:'t2',    t:'table',     lbl:'會計師\n吳雪如\n邱仁海　施義紳\n陳秋燕　士芬',     x:195, y:92,  w:178, h:84, cc:null },
+  /* 主席 */
+  { id:'t3',    t:'podium',    lbl:'主席\n陳樹',                                        x:382, y:92,  w:96,  h:84, cc:null },
+  /* 右側席 */
+  { id:'t4',    t:'table',     lbl:'律師',                                              x:486, y:92,  w:72,  h:84, cc:null },
+  { id:'t5',    t:'table',     lbl:'財務長',                                            x:566, y:92,  w:82,  h:84, cc:null },
+  { id:'t6',    t:'table',     lbl:'會計師\n許小姐',                                    x:656, y:92,  w:105, h:84, cc:null },
+  /* 司儀 */
+  { id:'p1',    t:'person',    lbl:'司\n儀',                                            x:772, y:100, w:66,  h:66, cc:null },
+  /* 海報架 */
+  { id:'sg1',   t:'sign',      lbl:'台\n（會議議程\n海報架）',                          x:10,  y:198, w:108, h:84, cc:null },
+  { id:'sg2',   t:'sign',      lbl:'出席股數\n海報架',                                  x:125, y:198, w:108, h:84, cc:null },
+  /* 第二排 */
+  { id:'p2',    t:'person',    lbl:'元大\n李董',                                        x:10,  y:308, w:70,  h:70, cc:null },
+  { id:'p3',    t:'person',    lbl:'美\n芳',                                            x:86,  y:314, w:60,  h:60, cc:null },
+  { id:'t7',    t:'table',     lbl:'記錄桌\n昱伶、又瑄',                               x:156, y:308, w:160, h:70, cc:null },
+  { id:'t8',    t:'table',     lbl:'視訊設備桌\n（2人）',                              x:490, y:308, w:170, h:70, cc:null },
+  { id:'p4',    t:'person',    lbl:'視訊小編\n韶宇、惠詒',                             x:668, y:300, w:98,  h:78, cc:null },
+  { id:'p5',    t:'person',    lbl:'照相手\n乃心',                                     x:774, y:308, w:66,  h:66, cc:null },
+  /* 股務區 */
+  { id:'t9',    t:'table',     lbl:'股務視訊桌',                                       x:490, y:408, w:150, h:64, cc:null },
+  { id:'t10',   t:'box',       lbl:'股務桌\n＋投票箱',                                  x:648, y:408, w:135, h:64, cc:null },
+  { id:'a1',    t:'area',      lbl:'元大 1人',                                          x:490, y:482, w:135, h:44, cc:null },
+  { id:'a2',    t:'area',      lbl:'元大 1人',                                          x:634, y:482, w:135, h:44, cc:null },
+  { id:'a3',    t:'area',      lbl:'淑儀、元大 1人',                                    x:156, y:408, w:180, h:64, cc:null },
+  /* 門口 */
+  { id:'d1',    t:'door',      lbl:'門口\n股東報到桌\n（室外）',                        x:360, y:590, w:180, h:84, cc:null },
 ];
 
-/* ── 建立元素 ── */
+function applyElStyle(el, cfg) {
+  const t = cfg.t;
+  if (cfg.cc) {
+    el.style.background = cfg.cc.bg;
+    el.style.borderColor = cfg.cc.border;
+    el.style.color = cfg.cc.text;
+    el.style.borderStyle = (t === 'area') ? 'dashed' : 'solid';
+    el.style.borderWidth = (t === 'door' || t === 'screen' || t === 'projector') ? '2px' : '1.5px';
+  } else {
+    el.style.background = '';
+    el.style.borderColor = '';
+    el.style.color = '';
+    el.style.borderStyle = '';
+    el.style.borderWidth = '';
+  }
+  el.style.borderRadius = (t === 'person') ? '50%' : (t === 'screen' || t === 'projector') ? '4px' : '6px';
+}
+
 function makeEl(cfg) {
   const el = document.createElement('div');
   el.className = 'el';
   el.dataset.t = cfg.t;
   el.dataset.id = cfg.id;
+  el.dataset.cc = cfg.cc ? JSON.stringify(cfg.cc) : '';
   el.style.cssText = `left:${cfg.x}px;top:${cfg.y}px;width:${cfg.w}px;height:${cfg.h}px;z-index:10;`;
+  applyElStyle(el, cfg);
   const lbl = document.createElement('div');
   lbl.className = 'lbl';
   lbl.textContent = cfg.lbl;
@@ -245,7 +320,7 @@ function makeEl(cfg) {
 
 function resetLayout() {
   canvas.innerHTML = '';
-  sel = null; ep.style.display = 'none';
+  sel = null; ep.style.display = 'none'; btnDup.disabled = true;
   INIT.forEach(cfg => makeEl({ ...cfg }));
 }
 resetLayout();
@@ -255,31 +330,54 @@ function addEl(t, lbl, w, h) {
   const wrap = document.getElementById('canvas-wrap');
   const cx = Math.round(wrap.scrollLeft + wrap.clientWidth / 2 - w / 2);
   const cy = Math.round(wrap.scrollTop + wrap.clientHeight / 2 - h / 2);
-  const el = makeEl({ id: 'n' + eid, t, lbl, x: Math.max(0, cx), y: Math.max(0, cy), w, h });
+  const el = makeEl({ id: 'n' + eid, t, lbl, x: Math.max(0, cx), y: Math.max(0, cy), w, h, cc: null });
   selectEl(el);
 }
 
-/* ── 選取 ── */
+function dupSel() {
+  if (!sel) return;
+  eid++;
+  const cc = sel.dataset.cc ? JSON.parse(sel.dataset.cc) : null;
+  const el = makeEl({
+    id: 'n' + eid, t: sel.dataset.t,
+    lbl: sel.querySelector('.lbl').textContent,
+    x: parseInt(sel.style.left) + 24, y: parseInt(sel.style.top) + 24,
+    w: parseInt(sel.style.width), h: parseInt(sel.style.height),
+    cc
+  });
+  selectEl(el);
+}
+
+function getElCC(el) {
+  return el.dataset.cc ? JSON.parse(el.dataset.cc) : null;
+}
+
 function selectEl(el) {
   if (sel) sel.classList.remove('sel');
   sel = el; el.classList.add('sel');
   ep.style.display = 'block';
+  btnDup.disabled = false;
   document.getElementById('ep-lbl').value = el.querySelector('.lbl').textContent;
   document.getElementById('ep-type').value = el.dataset.t;
   const w = parseInt(el.style.width), h = parseInt(el.style.height);
   document.getElementById('ep-w').value = w; document.getElementById('ep-wo').textContent = w;
   document.getElementById('ep-h').value = h; document.getElementById('ep-ho').textContent = h;
+  // load color pickers
+  const cc = getElCC(el);
+  const def = TYPE_COLORS[el.dataset.t] || TYPE_COLORS.table;
+  document.getElementById('cp-bg').value     = cc ? cc.bg     : def.bg;
+  document.getElementById('cp-border').value = cc ? cc.border : def.border;
+  document.getElementById('cp-text').value   = cc ? cc.text   : def.text;
 }
 
 function closeEp() {
   if (sel) sel.classList.remove('sel');
-  sel = null; ep.style.display = 'none';
+  sel = null; ep.style.display = 'none'; btnDup.disabled = true;
 }
 
 document.getElementById('canvas-wrap').addEventListener('click', closeEp);
 ep.addEventListener('click', e => e.stopPropagation());
 
-/* ── 編輯 ── */
 function updateSelLabel() {
   if (!sel) return;
   sel.querySelector('.lbl').textContent = document.getElementById('ep-lbl').value;
@@ -288,8 +386,13 @@ function updateSelType() {
   if (!sel) return;
   const t = document.getElementById('ep-type').value;
   sel.dataset.t = t;
-  // person 補圓形
-  sel.style.borderRadius = (t === 'person') ? '50%' : '6px';
+  sel.dataset.cc = '';
+  applyElStyle(sel, { t, cc: null });
+  // reset color pickers to new type default
+  const def = TYPE_COLORS[t] || TYPE_COLORS.table;
+  document.getElementById('cp-bg').value     = def.bg;
+  document.getElementById('cp-border').value = def.border;
+  document.getElementById('cp-text').value   = def.text;
 }
 function updSz() {
   if (!sel) return;
@@ -299,12 +402,34 @@ function updSz() {
   document.getElementById('ep-ho').textContent = h;
   sel.style.width = w + 'px'; sel.style.height = h + 'px';
 }
-function delSel() {
+
+function applyColor() {
   if (!sel) return;
-  canvas.removeChild(sel); sel = null; ep.style.display = 'none';
+  const cc = {
+    bg:     document.getElementById('cp-bg').value,
+    border: document.getElementById('cp-border').value,
+    text:   document.getElementById('cp-text').value,
+  };
+  sel.dataset.cc = JSON.stringify(cc);
+  applyElStyle(sel, { t: sel.dataset.t, cc });
 }
 
-/* ── 雙擊改名 ── */
+function resetColor() {
+  if (!sel) return;
+  sel.dataset.cc = '';
+  applyElStyle(sel, { t: sel.dataset.t, cc: null });
+  const def = TYPE_COLORS[sel.dataset.t] || TYPE_COLORS.table;
+  document.getElementById('cp-bg').value     = def.bg;
+  document.getElementById('cp-border').value = def.border;
+  document.getElementById('cp-text').value   = def.text;
+}
+
+function delSel() {
+  if (!sel) return;
+  canvas.removeChild(sel); sel = null;
+  ep.style.display = 'none'; btnDup.disabled = true;
+}
+
 function inlineEdit(el) {
   const lbl = el.querySelector('.lbl');
   const old = lbl.textContent;
@@ -322,7 +447,6 @@ function inlineEdit(el) {
   };
 }
 
-/* ── 拖曳（滑鼠）── */
 function onDragStart(e) {
   if (e.target.contentEditable === 'true') return;
   e.preventDefault();
@@ -341,7 +465,6 @@ function onDragStart(e) {
   window.addEventListener('mouseup', up);
 }
 
-/* ── 拖曳（觸控）── */
 function onTouchStart(e) {
   if (e.target.contentEditable === 'true') return;
   e.preventDefault();
@@ -362,7 +485,6 @@ function onTouchStart(e) {
   el.addEventListener('touchend', up);
 }
 
-/* ── 另存 HTML（含當前版面狀態）── */
 function exportHTML() {
   const title = document.getElementById('meeting-title').value.trim() || '股東會座位圖';
   const els = Array.from(canvas.querySelectorAll('.el')).map(el => ({
@@ -370,15 +492,12 @@ function exportHTML() {
     lbl: el.querySelector('.lbl').textContent,
     x: parseInt(el.style.left), y: parseInt(el.style.top),
     w: parseInt(el.style.width), h: parseInt(el.style.height),
+    cc: el.dataset.cc ? JSON.parse(el.dataset.cc) : null,
   }));
-  // 把當前版面狀態注入成新的 INIT
   const snapshot = JSON.stringify(els, null, 2);
   let src = document.documentElement.outerHTML;
-  // 替換 INIT 陣列內容
   src = src.replace(/const INIT = \[[\s\S]*?\];/, `const INIT = ${snapshot};`);
-  // 替換 title input 的 value
   src = src.replace(/value="[^"]*" title="點擊修改標題與日期"/, `value="${title.replace(/"/g,'&quot;')}" title="點擊修改標題與日期"`);
-  // 替換 <title>
   src = src.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
   const blob = new Blob([src], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
